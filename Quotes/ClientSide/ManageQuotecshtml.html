@@ -1,0 +1,368 @@
+﻿
+@{
+    ViewBag.Title = "ManageQuote";
+    Layout = "~/Views/Shared/_QuoteMuleAuthenticatedLayout.cshtml";
+}
+
+<div class="page-content-wrap" ng-controller="quoteManageController as quoteManCon">
+
+    @* Headers For Different States and Situations *@
+    <div ng-if="quoteManCon.userCompanyId != quoteManCon.quoteInfo.buyerCompanyId && quoteManCon.userCompanyId != quoteManCon.quoteInfo.sellerCompanyId" ng-cloak>
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title">I'm Sorry, You Are Not Authorized To View This Page :(</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div ng-if="quoteManCon.userCompanyId == quoteManCon.quoteInfo.sellerCompanyId && quoteManCon.quoteState == 2" ng-cloak>
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title">Your Quote Has Been Submitted For Review :)</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div ng-if="quoteManCon.userCompanyId == quoteManCon.quoteInfo.sellerCompanyId && quoteManCon.quoteState == 7" ng-cloak>
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title">Contract Has Been Accepted And Quote Is Completed. Click Button To Start Shipping Quote Request: </h1>
+                    <button type="button" class="btn btn-primary">Create Shipping Quote Request</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*End Headers*@
+
+
+    @*Contract View For Seller*@
+    <div class="row" style="width:800px" ng-if="quoteManCon.quoteInfo.sellerCompanyId == quoteManCon.userCompanyId && quoteManCon.quoteState == 8" ng-cloak>
+        <embed src="Https://s3-us-west-2.amazonaws.com/sabio-training/C27/cf80f9a7-eff2-4dec-93de-2d16403fe846.pdf" width="800px" height="1100px" />
+        <br />
+        <button class="btn btn-info pull-right" ng-click="quoteManCon.approveContract(9)">Accept Contract</button>
+    </div>
+    @*End Contract View*@
+
+
+    <div ng-if="quoteManCon.quoteInfo.sellerCompanyId == quoteManCon.userCompanyId && quoteManCon.quoteState == 1" ng-cloak>
+
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title" ng-cloak>Congratulations! Your Bid for {{quoteManCon.quoteInfo.quoteRequestItemName}} of the Quote Request "{{quoteManCon.quoteInfo.quoteRequestName}}" Has Been Accepted.</h1>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Details of Bid</h3>
+                </div>
+                <div class="panel-body" ng-cloak>
+                    <row>
+                        <div class="col-md-6">
+                            <h5 class="bid_detail_list_title"><u><strong>Quote Request Information</strong></u></h5>
+                            <ul>
+                                <li><strong>Company: {{quoteManCon.quoteInfo.buyerCompanyName}}</strong></li>
+                                <li><strong>Quote Request Name: {{quoteManCon.quoteInfo.quoteRequestName}}</strong></li>
+                                <li><strong>Quote Request Item Name: {{quoteManCon.quoteInfo.quoteRequestItemName}}</strong></li>
+                                <li><strong>Ship To Address: {{quoteManCon.quoteInfo.buyerCompanyAddress1}}, {{quoteManCon.quoteInfo.buyerCompanyCity}}, {{quoteManCon.quoteInfo.buyerCompanyState}} {{quoteManCon.quoteInfo.buyerCompanyZipCode}}</strong></li>
+                                <li><strong>Due Date: {{quoteManCon.quoteInfo.quoteRequestDueDate | date : 'MM/dd/yyyy'}}</strong></li>
+                            </ul>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h5 class="bid_detail_list_title"><u><strong>Bid Information</strong></u></h5>
+                            <ul>
+                                <li><strong>Amount: {{quoteManCon.quoteInfo.bidAmount | currency}}</strong></li>
+                                <li><strong>Ship From Address: {{quoteManCon.quoteInfo.sellerCompanyAddress1}}, {{quoteManCon.quoteInfo.sellerCompanyCity}}, {{quoteManCon.quoteInfo.sellerCompanyState}} {{quoteManCon.quoteInfo.sellerCompanyZipCode}}</strong></li>
+                                <li><strong>Bid Valid Until: {{quoteManCon.quoteInfo.bidExpirationDate | date: 'MM/dd/yyyy'}}</strong></li>
+                            </ul>
+                        </div>
+                    </row>
+
+                </div>
+            </div>
+
+
+
+            <div class="panel panel-default" ng-cloak>
+                <div class="panel-heading">
+                    <h3 class="panel-title">Add Items To {{quoteManCon.quoteInfo.quoteRequestItemName}}</h3>
+                </div>
+                <div class="panel-body">
+
+                    <form name="quoteDetailForm" role="form" novalidate>
+                        <div class="form-group">
+                            <label>Enter Quote Item: </label>
+                            <input type="text" class="form-control" ng-model="quoteManCon.quoteItemName" />
+                        </div>
+                        <div class="form-group">
+                            <label>Enter Quantity: </label>
+                            <input type="number" class="form-control" ng-model="quoteManCon.quantity" />
+                        </div>
+                        <div class="form-group">
+                            <label>Enter Units: </label>
+                            <select id="quoteItemUnits" name="quoteItemUnits" chosen class="form-control" ng-model="quoteManCon.unit" ng-options="unit.name as unit.name for unit in quoteManCon.sampleUnit track by unit.name" required>
+                                <option value=""></option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Enter Shipping Volume(cubic feet): </label>
+                            <input type="number" class="form-control" ng-model="quoteManCon.volume" />
+                        </div>
+                        <div class="form-group">
+                            <label>Enter Shipping Weight(Pounds): </label>
+                            <input type="number" class="form-control" ng-model="quoteManCon.weight" />
+                        </div>
+                    </form>
+
+                    <div class="panel-footer">
+                        <h3 class="panel-title">Add Quote Item To Quote</h3>
+                        <button type="button" class="btn btn-primary" style="float: right;" ng-click="quoteManCon.insertQuoteItem()">Add Quote Item</button>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="panel panel-default" ng-if="quoteManCon.quoteItemsList" ng-cloak>
+                <div class="panel-heading">
+                    <h3 class="panel-title">Quote Items</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: center;">Quote Item</th>
+                                    <th style="text-align: center;">Quantity</th>
+                                    <th style="text-align: center;">Unit</th>
+                                    <th style="text-align: center;">Shipping Volume(cubic feet)</th>
+                                    <th style="text-align: center;">Shipping Weight(Pounds)</th>
+                                    <th style="text-align: center;">Delete</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="quoteItem in quoteManCon.quoteItemsList">
+                                    <td style="text-align: center;">{{quoteItem.name}}</td>
+                                    <td style="text-align: center;">{{quoteItem.quantity}}</td>
+                                    <td style="text-align: center;">{{quoteItem.unit}}</td>
+                                    <td style="text-align: center;">{{quoteItem.volume}}</td>
+                                    <td style="text-align: center;">{{quoteItem.weight}}</td>
+                                    <td style="text-align: center;"><a href="#"><i class="glyphicon glyphicon-remove" ng-click="quoteManCon.deleteQuoteItem(quoteItem.quoteItemId)"></i></a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="panel-footer">
+                        <h3 class="panel-title">Submit Finalized Quote To {{quoteManCon.quoteInfo.buyerCompanyName}} For Review</h3>
+                        <button type="button" class="btn btn-primary" style="float: right;" ng-click="quoteManCon.submitFinalizedQuote(2)">Submit Quote</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div ng-if="quoteManCon.userCompanyId == quoteManCon.quoteInfo.buyerCompanyId" ng-cloak>
+
+
+        @* Buyer Company Headers *@
+        <div ng-if="quoteManCon.quoteState == 3" ng-cloak>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title" ng-cloak>You Have Accepted The Quote From {{quoteManCon.quoteInfo.sellerCompanyName}} And They Have Been Notified. Thank You For Doing Business With QuoteMule. Click <a href="~/Dashboard/Index"><u>Here</u></a> To Go To Your Dashboard Page.</h1>
+                </div>
+            </div>
+        </div>
+
+        <div ng-if="quoteManCon.quoteState == 6" ng-cloak>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title" ng-cloak>You Have Sent The Quote Back To {{quoteManCon.quoteInfo.sellerCompanyName}} For Alteration And They Have Been Notified. Click <a href="~/Dashboard/Index"><u>Here</u></a> To Go To Your Dashboard Page.</h1>
+                </div>
+            </div>
+        </div>
+
+        <div ng-if="quoteManCon.quoteState == 5" ng-cloak>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title" ng-cloak>You Have Declined The Quote From {{quoteManCon.quoteInfo.sellerCompanyName}} And They Have Been Notified. Click <a href="~/Dashboard/Index"><u>Here</u></a> To Go To Your Dashboard Page.</h1>
+                </div>
+            </div>
+        </div>
+
+        <div ng-if="quoteManCon.quoteState == 2 || quoteManCon.quoteState == 4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title" ng-cloak>{{quoteManCon.quoteInfo.sellerCompanyName}} Has Submitted A Quote On Quote Request Item: "{{quoteManCon.quoteInfo.quoteRequestItemName}}" Of Quote Request: "{{quoteManCon.quoteInfo.quoteRequestName}}" For Your Review.</h1>
+                </div>
+            </div>
+
+        </div>
+
+        <div ng-if="quoteManCon.quoteState == 8">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title" ng-cloak>A Contract Has Been Sent To {{quoteManCon.quoteInfo.sellerCompanyName}} For Approval. Sit Tight :)</h1>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div ng-if="quoteManCon.quoteState == 7" ng-cloak>
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h1 class="panel-title">Contract Accepted, Quote Completed!</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*End Headers*@
+
+
+
+        <div class="panel panel-default" ng-if="quoteManCon.quoteState == 2">
+            <div class="panel-heading">
+                <h3 class="panel-title">Details of Quote</h3>
+            </div>
+            <div class="panel-body" ng-cloak>
+                <div>
+                    <ul id="review_quote_infolist">
+                        <li><strong>Company: {{quoteManCon.quoteInfo.sellerCompanyName}}</strong></li>
+                        <li><strong>Quote Amount: {{quoteManCon.quoteInfo.bidAmount | currency}}</strong></li>
+                        <li><strong>Quote Request Name: {{quoteManCon.quoteInfo.quoteRequestName}}</strong></li>
+                        <li><strong>Ship To Address: {{quoteManCon.quoteInfo.buyerCompanyAddress1}}, {{quoteManCon.quoteInfo.buyerCompanyCity}}, {{quoteManCon.quoteInfo.buyerCompanyState}} {{quoteManCon.quoteInfo.buyerCompanyZipCode}}</strong></li>
+                        <li><strong>Ship From Address: {{quoteManCon.quoteInfo.sellerCompanyAddress1}}, {{quoteManCon.quoteInfo.sellerCompanyCity}}, {{quoteManCon.quoteInfo.sellerCompanyState}} {{quoteManCon.quoteInfo.sellerCompanyZipCode}}</strong></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h5><u><strong>Quote Items For {{quoteManCon.quoteInfo.quoteRequestItemName}}</strong></u></h5>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center;">Quote Item</th>
+                                <th style="text-align: center;">Quantity</th>
+                                <th style="text-align: center;">Unit</th>
+                                <th style="text-align: center;">Shipping Volume(cubic feet)</th>
+                                <th style="text-align: center;">Shipping Weight(Pounds)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="quoteItem in quoteManCon.quoteInfo.quoteItemList">
+                                <td style="text-align: center;">{{quoteItem.name}}</td>
+                                <td style="text-align: center;">{{quoteItem.quantity}}</td>
+                                <td style="text-align: center;">{{quoteItem.unit}}</td>
+                                <td style="text-align: center;">{{quoteItem.volume}}</td>
+                                <td style="text-align: center;">{{quoteItem.weight}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+
+
+                <div class="panel-footer">
+                    <div class="quote-button-wrapper">
+                        <div class="quote-button">
+                            <h6>Click Button To Accept Quote: </h6>
+                            <button type="button" class="btn btn-primary" ng-click="quoteManCon.quoteAccepted(3)">Accept Quote</button>
+                        </div>
+                        <br />
+                        <div class="quote-button">
+                            <h6 ng-cloak ng-if="!quoteManCon.publishedContractURL">Click Button To Accept Quote And Add Contract: </h6>
+                            <h6 ng-cloak ng-if="quoteManCon.publishedContractURL">Click Button To View Contract and Send to Supplier: </h6>
+                            <button type="button" class="btn btn-success" ng-cloak ng-if="!quoteManCon.publishedContractURL" ng-click="quoteManCon.openContractsEditorModal()">Add Contract</button>
+                            <button type="button" class="btn btn-success" ng-cloak ng-if="quoteManCon.publishedContractURL" ng-click="quoteManCon.openPublishedContractModal()">View Contract</button>
+                        </div>
+                        <br />
+                        <div class="quote-button">
+                            <h6>Click Button To Send Quote Back For Changes: </h6>
+                            <button type="button" class="btn btn-warning" ng-click="quoteManCon.alterQuote(6)">Alter Quote</button>
+                        </div>
+                        <br />
+                        <div class="quote-button">
+                            <h6>Click Button To Decline Quote: </h6>
+                            <button type="button" class="btn btn-danger" ng-click="quoteManCon.declineQuote(7)">Decline Quote</button>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        @*<div ng-if="quoteManCon.publishedContractURL" class="col-md-2 col-md-offset-10">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Contract</h3>
+                    </div>
+
+                    <div class="panel-body" style="text-align:center" ng-cloak>
+                        <a href="{{quoteManCon.publishedContractURL}}" target="_blank">
+                            <img ng-src="https://cdn.worldvectorlogo.com/logos/adobe-pdf-icon.svg" style="width:50px;" />
+                            <p>Contract</p>
+                        </a>
+                    </div>
+
+                    <div class="panel-footer">
+                        <div class="quote-button-wrapper">
+                            <button type="button" class="btn btn-success" ng-click="quoteManCon.sendContractToSupplier">Send to Supplier</button>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>*@
+
+    </div>
+
+
+</div>
+
+<input type="hidden" id="QUOTEID" value="@Model._QuoteId" />
+
+@section pageInItScripts {
+
+    <script src="~/Scripts/bower_components/chosen/chosen.jquery.js"></script>
+    <script src="~/Scripts/bower_components/angular-chosen-localytics/dist/angular-chosen.min.js"></script>
+    <script src="~/Scripts/app/Modules/sabio.module.ngChosen.js"></script>
+
+}
+
+
+@section scripts {
+    <script src="~/Scripts/sabio.services.quoteStateMachine.js"></script>
+    <script src="~/Scripts/app/Quotes/Services/quoteStateMachineService.js"></script>
+    <script src="~/Scripts/sabio.services.quotes.js"></script>
+    <script src="~/Scripts/app/Quotes/Services/quoteService.js"></script>
+    <script src="~/Scripts/app/Quotes/Controllers/quoteManageController.js"></script>
+
+    @* CONTRACTS *@
+    <script src="~/Scripts/app/Contracts/Controllers/contractsController.js"></script>
+    <script src="~/Scripts/app/Contracts/Controllers/contractsEditorModalController.js"></script>
+    <script src="~/Scripts/sabio.services.quotes.js"></script>
+    <script src="~/Scripts/app/Quotes/Services/quoteService.js"></script>
+    <script src="~/Scripts/sabio.services.pdf.js"></script>
+    <script src="~/Scripts/app/Contracts/Services/PDFService.js"></script>
+    <script src="~/Scripts/sabio.services.contract.js"></script>
+    <script src="~/Scripts/app/Contracts/Services/contractsService.js"></script>
+    <script src="~/Scripts/app/Modules/sabio.module.ngSummernote.js"></script>
+
+    <script src="~/Scripts/app/Contracts/Controllers/publishedContractModalController.js"></script>
+}
