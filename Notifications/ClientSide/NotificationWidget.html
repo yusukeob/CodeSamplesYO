@@ -1,0 +1,15 @@
+<div class="col-md-3">
+     <!-- START WIDGET SLIDER -->
+     <div ng-controller="authenticatedLayoutNotificationController as ALnotificationC" ng-cloak>
+        <a class="widget widget-default widget-item-icon" href="/public/profilepage">
+        <div class="widget-item-left">
+            <span class="fa fa-exclamation"></span>
+        </div>
+        <div class="widget-data">
+             <div class="widget-int num-count" ng-if="ALnotificationC.unreadNotifications !== null">{{ALnotificationC.unreadNotifications.length}}</div>
+             <div class="widget-title">Unread <span ng-if="ALnotificationC.unreadNotifications.length !== 1">Notifications</span><span ng-if="ALnotificationC.unreadNotifications.length == 1">Notification</span></div>
+        </div>                               
+        </a>
+    </div>
+    <!-- END WIDGET SLIDER -->
+</div>

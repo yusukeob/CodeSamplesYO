@@ -1,0 +1,37 @@
+<div ng-controller="profilePageNotificationController as PPnotificationC" ng-cloak id="notification_list">
+                <div class="panel-heading" ng-class="{noNotifications: PPnotificationC.notifications == null}">
+                    <div class="panel-title-box">
+                        <h3><span ng-if="PPnotificationC.notifications == null" id="no_notification_span">No </span>Notifications</h3>
+                        <span ng-if="PPnotificationC.notifications != null">{{PPnotificationC.unreadNotifications.length}}<span ng-if="PPnotificationC.unreadNotifications == null">0</span> Unread <span ng-if="PPnotificationC.unreadNotifications.length !== 1">Notifications</span><span ng-if="PPnotificationC.unreadNotifications.length == 1">Notification</span></span>
+                        <div ng-if="PPnotificationC.notifications != null" id="notification_header_button_div">
+                            <button type="button" class="btn btn-warning notification-button" ng-click="PPnotificationC.selectAllCheckBoxes()">Check All</button>
+                            <button type="button" class="btn btn-success notification-button" ng-click="PPnotificationC.uncheckAllCheckBoxes()">Uncheck All</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body" ng-if="PPnotificationC.notifications != null" ng-class="{hasNotifications: PPnotificationC.notifications != null}">
+                    <div class="table-responsive" id="notification_table" style="height: 223px; overflow-y: auto;">
+                        <table class="table table-hover table-bordered">
+                            <tbody>
+                                <tr ng-repeat="notification in PPnotificationC.notifications | orderBy:'-'">
+                                    <td ng-class="{isRead: notification.is_Read == true, notRead: notification.is_Read == false}">
+                                        <input type="checkbox" name="selectedNotifications[]" ng-model="notification.selected" />
+                                    </td>
+                                    <td ng-class="{isRead: notification.is_Read == true, notRead: notification.is_Read == false}">
+                                        <div>
+                                            <u>{{notification.dateCreated | date: 'M-dd HH:mm'}}</u>
+                                        </div>
+                                        <div>
+                                            {{notification.message1}} <a href="{{notification.link}}"><u>{{notification.message2}}</u></a> {{notification.message3}}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="notification_footer_button_div">
+                        <button type="button" class="btn btn-info notification-button" ng-click="PPnotificationC.markAsReadCheckedNotifications()">Mark As Read</button>
+                        <button type="button" class="btn btn-primary notification-button" ng-click="PPnotificationC.deleteCheckedNotifications()">Delete</button>
+                    </div>
+                </div>
+</div>
