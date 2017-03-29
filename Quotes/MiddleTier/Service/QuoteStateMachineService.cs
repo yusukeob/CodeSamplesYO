@@ -1,10 +1,10 @@
-using Sabio.Web.Domain;
-using Sabio.Web.Domain.Quotes;
-using Sabio.Web.Enums.QuoteRequestBidWorkflow;
+using Domain;
+using Domain.Quotes;
+using Enums.QuoteRequestBidWorkflow;
 using Stateless;
 using System;
 
-namespace Sabio.Web.Services.Workflow
+namespace Services.Workflow
 {
     public class QuoteStateService
     {
